@@ -45,44 +45,51 @@ const Lists = ({ mediaType, id, type }: SimilarListProps) => {
               : "Recommendations"}
           </h2>
         </div>
-        <div className="relative">
-          <div
-            ref={containerRef}
-            className="grid grid-flow-col gap-3 overflow-x-hidden pb-5"
-          >
-            {results.map((result) => (
-              <Link
-                to={`/${mediaType}/${result.id}`}
-                key={result.id}
-                className="bg-[#389FDD] w-[150px] h-[200px] lg:w-[200px] lg:h-[300px] rounded-md overflow-hidden hover:opacity-80"
-              >
-                <img
-                  src={
-                    result.poster_path
-                      ? `https://image.tmdb.org/t/p/original${result.poster_path}`
-                      : noPoster
-                  }
-                  alt={result.title}
-                  className="w-full h-full object-cover object-center scale-100 hover:scale-105 transition-all duration-200"
-                />
-              </Link>
-            ))}
-          </div>
-          <div className="absolute text-[#389FDD] w-full flex justify-between items-center -translate-y-[8rem] lg:-translate-y-[11rem]">
+        {results.length > 0 ? (
+          <div className="relative">
+            <div
+              ref={containerRef}
+              className="grid grid-flow-col gap-3 overflow-x-hidden pb-5"
+            >
+              {results.map((result) => (
+                <Link
+                  to={`/${mediaType}/${result.id}`}
+                  key={result.id}
+                  className="bg-[#389FDD] w-[150px] h-[200px] lg:w-[200px] lg:h-[300px] rounded-md overflow-hidden hover:opacity-80"
+                >
+                  <img
+                    src={
+                      result.poster_path
+                        ? `https://image.tmdb.org/t/p/original${result.poster_path}`
+                        : noPoster
+                    }
+                    alt={result.title}
+                    className="w-full h-full object-cover object-center scale-100 hover:scale-105 transition-all duration-200"
+                  />
+                </Link>
+              ))}
+            </div>
             <button
               onClick={() => scrollState("left")}
-              className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center ms-1 p-1"
+              className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center ms-1 p-1 absolute left-0 -translate-y-[8rem] lg:-translate-y-[11rem] text-[#389FDD]"
             >
               <ChevronLeft size={30} />
             </button>
             <button
               onClick={() => scrollState("right")}
-              className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center me-1 p-1"
+              className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center me-1 p-1  absolute right-0 -translate-y-[8rem] lg:-translate-y-[11rem] text-[#389FDD]"
             >
               <ChevronRight size={30} />
             </button>
           </div>
-        </div>
+        ) : (
+          <div>
+            <p>
+              No recommendations for this{" "}
+              {mediaType === "movie" ? "movie" : "series"}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -71,20 +71,19 @@ const MovieList = ({ title }: MovieListProps) => {
               </Link>
             ))}
           </div>
-          <div className="absolute text-[#389FDD] w-full flex justify-between items-center -translate-y-[8rem] lg:-translate-y-[11rem]">
-            <button
-              onClick={() => scrollState("left")}
-              className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center ms-1 p-1"
-            >
-              <ChevronLeft size={30} />
-            </button>
-            <button
-              onClick={() => scrollState("right")}
-              className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center me-1 p-1"
-            >
-              <ChevronRight size={30} />
-            </button>
-          </div>
+
+          <button
+            onClick={() => scrollState("left")}
+            className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center ms-1 p-1 absolute left-0 -translate-y-[8rem] lg:-translate-y-[11rem] text-[#389FDD]"
+          >
+            <ChevronLeft size={30} />
+          </button>
+          <button
+            onClick={() => scrollState("right")}
+            className="bg-transparent hover:bg-black/70 rounded-full flex items-center justify-center me-1 p-1 absolute right-0 -translate-y-[8rem] lg:-translate-y-[11rem] text-[#389FDD]"
+          >
+            <ChevronRight size={30} />
+          </button>
         </div>
       </div>
     </div>

@@ -7,6 +7,8 @@ import fetchGenres from "../../hooks/fetchGenres";
 const Explore = () => {
   const { mediaType } = useParams();
   const [pageNum, setPageNum] = useState(1);
+  const [sortBy, setSortBy] = useState("popularity_desc");
+
   const { data } = customFetch(
     `/discover/${mediaType}?include_video=false&language=en-US&page=${pageNum}`
   );
@@ -25,7 +27,7 @@ const Explore = () => {
     }
   };
 
-  if (!genres) return;
+  results.sort((a, b) => b.popularity - a.popularity);
 
   return (
     <section className="bg-black text-white min-h-screen">
@@ -42,11 +44,12 @@ const Explore = () => {
           <div className="w-full md:w-fit flex flex-col md:flex-row gap-2 text-black">
             <select className="w-full p-2 rounded-lg text-sm">
               <option hidden>Select Genres</option>
-              {genres.genres.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
+              {genres &&
+                genres.genres.map((item) => (
+                  <option key={item.id} value={item.name}>
+                    {item.name}
+                  </option>
+                ))}
             </select>
             <select className="w-full p-2 rounded-lg text-sm">
               <option hidden>Sort By</option>
