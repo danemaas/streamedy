@@ -1,33 +1,118 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import customFetch from "../../hooks/customFetch";
 import fetchGenres from "../../hooks/fetchGenres";
+import {
+  JsonMovieResponse,
+  JsonSeriesResponse,
+  Movie,
+  TVSeries,
+} from "../../types";
+import { sortMovies, sortSeries } from "../../utils/functions";
+import { useFetch } from "../../utils/api";
+import noPoster from "../../assets/no-poster.png";
 
-const Explore = () => {
+const SORT_DATA = [
+  {
+    sortName: "Popularity Desc",
+    sortValue: "popularity.desc",
+  },
+  {
+    sortName: "Popularity Asc",
+    sortValue: "popularity.asc",
+  },
+  {
+    sortName: "Rating Desc",
+    sortValue: "vote_average.desc",
+  },
+  {
+    sortName: "Rating Asc",
+    sortValue: "vote_average.asc",
+  },
+  {
+    sortName: "Release Date Desc",
+    sortValue: "release_date.desc",
+  },
+  {
+    sortName: "Release Date Asc",
+    sortValue: "release_date.asc",
+  },
+  {
+    sortName: "Title (A-Z)",
+    sortValue: "original_title.desc" || "original_name.desc",
+  },
+];
+
+const Explore = <T extends Movie | TVSeries>() => {
   const { mediaType } = useParams();
   const [pageNum, setPageNum] = useState(1);
-  const [sortBy, setSortBy] = useState("popularity_desc");
+  const [totalPages, setTotalPages] = useState(0);
+  const [sortBy, setSortBy] = useState<string>("");
+  const [genre, setGenre] = useState<string>();
+  const [sortedData, setSortedData] = useState<T[]>();
 
-  const { data } = customFetch(
-    `/discover/${mediaType}?include_video=false&language=en-US&page=${pageNum}`
+  const { data: genres } = fetchGenres(
+    `/genre/${mediaType}/list?language=en&with_genres=action`
   );
-  const { data: genres } = fetchGenres(`/genre/${mediaType}/list?language=en`);
-  const { results, total_pages } = data;
 
   const handleNextPage = () => {
-    if (data && pageNum < total_pages) {
+    if (pageNum < totalPages) {
       setPageNum((prev) => prev + 1);
     }
   };
 
   const handlePrevPage = () => {
-    if (data && pageNum > 1) {
+    if (pageNum > 1) {
       setPageNum((prev) => prev - 1);
     }
   };
 
-  results.sort((a, b) => b.popularity - a.popularity);
+  useEffect(() => {
+    const handleSort = () => {
+      if (mediaType === "movie") {
+        const sortedArray = sortMovies({
+          array: sortedData as Movie[],
+          sortBy: sortBy!,
+        });
+        setSortedData(sortedArray as T[]);
+      } else {
+        const sortedArray = sortSeries({
+          array: sortedData as TVSeries[],
+          sortBy: sortBy!,
+        });
+        setSortedData(sortedArray as T[]);
+      }
+    };
+
+    handleSort();
+  }, [sortBy]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let endpoint = `/discover/${mediaType}?include_video=false&language=en-US&page=${pageNum}`;
+
+      if (genre !== undefined) {
+        endpoint += `&with_genres=${genre}`;
+      }
+
+      try {
+        const res: JsonMovieResponse | JsonSeriesResponse = await useFetch(
+          endpoint
+        );
+
+        const { page, total_pages, results } = res;
+        setPageNum(page);
+        setTotalPages(total_pages);
+        setSortedData(
+          mediaType === "movie" ? (results as T[]) : (results as T[])
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, [mediaType, genre, pageNum]);
 
   return (
     <section className="bg-black text-white min-h-screen">
@@ -42,42 +127,51 @@ const Explore = () => {
             )}
           </h2>
           <div className="w-full md:w-fit flex flex-col md:flex-row gap-2 text-black">
-            <select className="w-full p-2 rounded-lg text-sm">
+            <select
+              className="w-full p-2 rounded-lg text-sm"
+              onChange={(e) => setGenre(e.target.value)}
+            >
               <option hidden>Select Genres</option>
               {genres &&
                 genres.genres.map((item) => (
-                  <option key={item.id} value={item.name}>
+                  <option key={item.id} value={item.id}>
                     {item.name}
                   </option>
                 ))}
             </select>
-            <select className="w-full p-2 rounded-lg text-sm">
+            <select
+              className="w-full p-2 rounded-lg text-sm"
+              onChange={(e) => setSortBy(e.target.value)}
+            >
               <option hidden>Sort By</option>
-              <option value="popularity_desc">Popularity Desc</option>
-              <option value="popularity_asc">Popularity Asc</option>
-              <option value="vote_average_desc">Rating Desc</option>
-              <option value="vote_average_asc">Rating Asc</option>
-              <option value="release_date_desc">Release Date Desc</option>
-              <option value="release_date_asc">Release Date Asc</option>
-              <option value="title_desc">Title (A-Z)</option>
+              {SORT_DATA.map((item) => (
+                <option key={item.sortName} value={item.sortValue}>
+                  {item.sortName}
+                </option>
+              ))}
             </select>
           </div>
         </div>
         <hr />
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 py-5">
-          {results.map((item) => (
-            <Link
-              key={item.id}
-              to={`/${mediaType}/${item.id}`}
-              className="rounded-md overflow-hidden group"
-            >
-              <img
-                src={`https://image.tmdb.org/t/p/original${item.poster_path}`}
-                alt={item.title}
-                className="group-hover:scale-105 group-hover:opacity-85 transition-all duration-300"
-              />
-            </Link>
-          ))}
+          {sortedData &&
+            sortedData.map((item) => (
+              <Link
+                key={item.id}
+                to={`/${mediaType}/${item.id}`}
+                className="rounded-md overflow-hidden group"
+              >
+                <img
+                  src={
+                    item.poster_path
+                      ? `https://image.tmdb.org/t/p/original${item.poster_path}`
+                      : noPoster
+                  }
+                  alt={(item as Movie).title || (item as TVSeries).name}
+                  className="group-hover:scale-105 group-hover:opacity-85 transition-all duration-300"
+                />
+              </Link>
+            ))}
         </div>
         <div className="w-full flex items-center justify-center gap-5">
           <button
@@ -88,7 +182,7 @@ const Explore = () => {
             Prev
           </button>
           <button
-            disabled={pageNum === total_pages}
+            disabled={pageNum === totalPages}
             onClick={() => handleNextPage()}
             className="border-2 border-[#389FDD] px-5 py-2 rounded-md hover:bg-[#389FDD] hover:text-black transition-all duration-300"
           >

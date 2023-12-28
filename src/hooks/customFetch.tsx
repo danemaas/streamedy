@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useFetch } from "../utils/api";
-import { JsonMovieResponse } from "../types";
 
 const INITIAL_DATA = {
   page: 0,
@@ -10,7 +9,7 @@ const INITIAL_DATA = {
 };
 
 const customFetch = (url: string) => {
-  const [data, setData] = useState<JsonMovieResponse>(INITIAL_DATA);
+  const [data, setData] = useState(INITIAL_DATA);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
