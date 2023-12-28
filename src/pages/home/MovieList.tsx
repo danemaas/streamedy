@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Tabs from "../../components/Tabs";
 import customFetch from "../../hooks/customFetch";
 import noPoster from "../../assets/no-poster.png";
+import { Movie, TVSeries } from "../../types";
 
 type MovieListProps = {
   title: string;
@@ -65,7 +66,7 @@ const MovieList = ({ title }: MovieListProps) => {
                       ? `https://image.tmdb.org/t/p/original${result.poster_path}`
                       : noPoster
                   }
-                  alt={result.title}
+                  alt={(result as Movie).title || (result as TVSeries).name}
                   className="w-full h-full object-cover object-center scale-100 hover:scale-105 transition-all duration-200"
                 />
               </Link>

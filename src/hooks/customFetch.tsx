@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useFetch } from "../utils/api";
+import { JsonMovieResponse, JsonSeriesResponse } from "../types";
 
-const INITIAL_DATA = {
+const INITIAL_DATA: JsonMovieResponse | JsonSeriesResponse = {
   page: 0,
   results: [],
   total_pages: 0,

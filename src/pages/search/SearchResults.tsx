@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import customFetch from "../../hooks/customFetch";
 import noPoster from "../../assets/no-poster.png";
 import { useState } from "react";
+import { Movie, TVSeries } from "../../types";
 
 const SearchResults = () => {
   const [pageNum, setPageNum] = useState(1);
@@ -67,7 +68,7 @@ const SearchResults = () => {
                     ? `https://image.tmdb.org/t/p/original${result.poster_path}`
                     : noPoster
                 }
-                alt={result.title}
+                alt={(result as Movie).title || (result as TVSeries).name}
                 className=""
               />
             </Link>
